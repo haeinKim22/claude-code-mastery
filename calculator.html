@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>계산기</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: #14151a;
+      font-family: system-ui, "Noto Sans KR", sans-serif;
+    }
+    .calc {
+      width: 320px;
+      padding: 20px;
+      border-radius: 20px;
+      background: #1e2028;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+    .display {
+      min-height: 90px;
+      padding: 12px 8px;
+      text-align: right;
+      color: #fff;
+      word-break: break-all;
+    }
+    .display .prev { height: 20px; font-size: 14px; color: #8b8fa3; }
+    .display .curr { font-size: 36px; font-weight: 600; }
+    .keys {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    button {
+      height: 60px;
+      border: 0;
+      border-radius: 14px;
+      font-size: 20px;
+      color: #fff;
+      background: #2c2f3a;
+      cursor: pointer;
+      transition: filter 0.1s, transform 0.05s;
+    }
+    button:hover { filter: brightness(1.2); }
+    button:active { transform: scale(0.96); }
+    button.op { background: #ff6b5e; }
+    button.fn { background: #444857; }
+    button.wide { grid-column: span 2; }
+  </style>
+</head>
+<body>
+  <main class="calc">
+    <div class="display">
+      <div class="prev" id="prev"></div>
+      <div class="curr" id="curr">0</div>
+    </div>
+    <div class="keys" id="keys">
+      <button class="fn" data-action="clear">AC</button>
+      <button class="fn" data-action="delete">⌫</button>
+      <button class="fn" data-action="percent">%</button>
+      <button class="op" data-op="÷">÷</button>
+
+      <button data-num="7">7</button>
+      <button data-num="8">8</button>
+      <button data-num="9">9</button>
+      <button class="op" data-op="×">×</button>
+
+      <button data-num="4">4</button>
+      <button data-num="5">5</button>
+      <button data-num="6">6</button>
+      <button class="op" data-op="−">−</button>
+
+      <button data-num="1">1</button>
+      <button data-num="2">2</button>
+      <button data-num="3">3</button>
+      <button class="op" data-op="+">+</button>
+
+      <button class="wide" data-num="0">0</button>
+      <button data-action="dot">.</button>
+      <button class="op" data-action="equals">=</button>
+    </div>
+  </main>
+
+  <script>
+    // 계산기 상태: 현재 입력값, 이전 값, 선택된 연산자
+    const state = { curr: "0", prev: null, operator: null, justCalculated: false };
+
+    const currEl = document.getElementById("curr");
+    const prevEl = document.getElementById("prev");
+
+    // 두 숫자와 연산자를 받아 결과(숫자)를 반환한다.
+    function calculate(a, b, operator) {
+      // TODO(human): 연산자(+, −, ×, ÷)에 따라 a와 b를 계산해 반환하세요.
+      // 0으로 나누는 경우를 어떻게 처리할지도 함께 결정해 보세요.
+    }
+
+    // 부동소수점 오차(0.1 + 0.2 등)를 줄이고 문자열로 변환
+    function format(num) {
+      if (typeof num !== "number" || !isFinite(num)) return "오류";
+      return String(parseFloat(num.toPrecision(12)));
+    }
+
+    function render() {
+      currEl.textContent = state.curr;
+      prevEl.textContent = state.operator ? `${state.prev} ${state.operator}` : "";
+    }
+
+    function inputNumber(n) {
+      if (state.justCalculated || state.curr === "0" || state.curr === "오류") {
+        state.curr = n;
+        state.justCalculated = false;
+      } else {
+        state.curr += n;
+      }
+    }
+
+    function inputDot() {
+      if (state.justCalculated) {
+        state.curr = "0";
+        state.justCalculated = false;
+      }
+      if (!state.curr.includes(".")) state.curr += ".";
+    }
+
+    function chooseOperator(op) {
+      if (state.curr === "오류") return;
+      // 연산자를 연속으로 누르면 중간 계산 수행
+      if (state.operator && !state.justCalculated) {
+        state.curr = format(calculate(parseFloat(state.prev), parseFloat(state.curr), state.operator));
+      }
+      state.prev = state.curr;
+      state.operator = op;
+      state.justCalculated = true;
+    }
+
+    function equals() {
+      if (!state.operator) return;
+      const result = calculate(parseFloat(state.prev), parseFloat(state.curr), state.operator);
+      state.curr = format(result);
+      state.prev = null;
+      state.operator = null;
+      state.justCalculated = true;
+    }
+
+    function handleAction(action) {
+      switch (action) {
+        case "clear":
+          Object.assign(state, { curr: "0", prev: null, operator: null, justCalculated: false });
+          break;
+        case "delete":
+          state.curr = state.curr.length > 1 && state.curr !== "오류" ? state.curr.slice(0, -1) : "0";
+          break;
+        case "percent":
+          state.curr = format(parseFloat(state.curr) / 100);
+          break;
+        case "dot": inputDot(); break;
+        case "equals": equals(); break;
+      }
+    }
+
+    // 이벤트 위임: 버튼마다 리스너를 달지 않고 부모에서 한 번에 처리
+    document.getElementById("keys").addEventListener("click", (e) => {
+      const btn = e.target.closest("button");
+      if (!btn) return;
+      if (btn.dataset.num) inputNumber(btn.dataset.num);
+      else if (btn.dataset.op) chooseOperator(btn.dataset.op);
+      else if (btn.dataset.action) handleAction(btn.dataset.action);
+      render();
+    });
+
+    // 키보드 입력 지원
+    document.addEventListener("keydown", (e) => {
+      const opMap = { "+": "+", "-": "−", "*": "×", "/": "÷" };
+      if (/^[0-9]$/.test(e.key)) inputNumber(e.key);
+      else if (e.key in opMap) { e.preventDefault(); chooseOperator(opMap[e.key]); }
+      else if (e.key === "." ) inputDot();
+      else if (e.key === "Enter" || e.key === "=") equals();
+      else if (e.key === "Backspace") handleAction("delete");
+      else if (e.key === "Escape") handleAction("clear");
+      else return;
+      render();
+    });
+  </script>
+</body>
+</html>

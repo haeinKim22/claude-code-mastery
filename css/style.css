@@ -1,0 +1,83 @@
+/* Tailwind로 표현하기 어려운 스타일만 정의합니다. */
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 4rem; /* 고정 헤더 높이만큼 앵커 위치 보정 */
+}
+
+/* 공통 컴포넌트 */
+.section-title {
+  margin-bottom: 1.5rem;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+.dark .section-title { color: #fff; }
+
+.badge {
+  border-radius: 9999px;
+  background: #eef2ff;
+  padding: 0.375rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #4338ca;
+}
+.dark .badge { background: #312e81; color: #c7d2fe; }
+
+.card {
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08); }
+.dark .card { border-color: #334155; }
+
+.sns-card {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  transition: transform 0.2s, border-color 0.2s;
+}
+.sns-card:hover { transform: translateY(-3px); border-color: #6366f1; }
+.dark .sns-card { border-color: #334155; }
+
+/* 네비게이션 현재 섹션 표시 */
+.nav-link:hover,
+.nav-link.active { color: #4f46e5; }
+.dark .nav-link:hover,
+.dark .nav-link.active { color: #818cf8; }
+
+/* 경력 타임라인 */
+.timeline { border-left: 2px solid #c7d2fe; padding-left: 1.5rem; }
+.dark .timeline { border-left-color: #3730a3; }
+.timeline-item { position: relative; }
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -1.95rem;
+  top: 0.35rem;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 9999px;
+  background: #4f46e5;
+}
+
+/* 스크롤 등장 애니메이션 (JS가 켜져 있을 때만 숨김 처리) */
+.js .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s, transform 0.6s; }
+.js .reveal.visible { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .js .reveal { opacity: 1; transform: none; transition: none; }
+}
+
+/* 인쇄용 */
+@media print {
+  header, #theme-toggle, #copy-email { display: none !important; }
+  .js .reveal { opacity: 1; transform: none; }
+  section { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+}
